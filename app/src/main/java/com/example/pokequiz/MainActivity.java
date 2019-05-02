@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
+import android.os.CountDownTimer;
 import android.os.StrictMode;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -13,6 +14,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 
 import org.json.JSONArray;
@@ -31,6 +33,7 @@ import java.util.concurrent.ExecutionException;
 public class MainActivity extends AppCompatActivity {
     ImageView img;
     TextView roundImg;
+    TextView timer;
     Button opt1;
     Button opt2;
     Button opt3;
@@ -61,6 +64,7 @@ public class MainActivity extends AppCompatActivity {
         opt2 = findViewById(R.id.opt2);
         opt3 = findViewById(R.id.opt3);
         opt4 = findViewById(R.id.opt4);
+        timer = findViewById(R.id.timer);
         Pokedex object = new Pokedex();
         object.downloadJSON();
         pokedex = object.loadJSONobject();
@@ -92,7 +96,37 @@ public class MainActivity extends AppCompatActivity {
                 checkIfRight(opt4.getText().toString());
             }
         });
+
+        new CountDownTimer(60000, 1000) {
+
+            public void onTick(long millisecondsUntilDone) {
+
+                // Coundown is counting down (every second)
+
+                timer.setText("00:"+ String.valueOf(millisecondsUntilDone / 1000));
+
+            }
+
+            public void onFinish() {
+
+                if (rightCount >= 0 && rightCount <= 10) {
+                    Intent i = new Intent(MainActivity.this, Newbie.class);
+                    i.putExtra("acertos", String.valueOf(rightCount));
+                    startActivity(i);
+                } else if (rightCount >= 11 && rightCount <= 20) {
+                    Intent i = new Intent(MainActivity.this, ExperientTreiner.class);
+                    i.putExtra("acertos", String.valueOf(rightCount));
+                    startActivity(i);
+                } else {
+                    Intent i = new Intent(MainActivity.this, PokemonMaster.class);
+                    i.putExtra("acertos", String.valueOf(rightCount));
+                    startActivity(i);
+                }
+
+            }
+        }.start();
     }
+
 
     public void newGame() {
         try {
@@ -125,6 +159,9 @@ public class MainActivity extends AppCompatActivity {
     public void checkIfRight(String option) {
         if (option.equals(rightName)) {
             rightCount++;
+            Toast.makeText(getApplicationContext(),"Acertou", Toast.LENGTH_SHORT).show();
+        }else{
+            Toast.makeText(getApplicationContext(),"Errou,o correto é "+rightName, Toast.LENGTH_SHORT).show();
         }
         round++;
         if (round == 30) {
